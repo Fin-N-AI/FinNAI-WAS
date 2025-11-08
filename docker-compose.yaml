@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  # Spring Boot Backend Server
+  backend:
+    build: .
+    container_name: finnai-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/${POSTGRES_DB}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+    depends_on:
+      - db
+
+  # PostgreSQL Database
+  db:
+    image: postgres:15
+    container_name: finnai-db
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      # 컨테이너가 삭제되어도 DB 데이터를 영구적으로 보존하기 위한 볼륨 연결
+      - postgres-data:/var/lib/postgresql/data
+
+# Docker가 관리할 데이터 볼륨을 정의
+volumes:
+  postgres-data:
