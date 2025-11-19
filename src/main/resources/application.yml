@@ -1,12 +1,8 @@
 spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/ssafydb?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: root
-    password:
   jpa:
     hibernate:
-      ddl-auto: update   # create / update / validate / none 중 선택
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     properties:
       hibernate:
         format_sql: true
