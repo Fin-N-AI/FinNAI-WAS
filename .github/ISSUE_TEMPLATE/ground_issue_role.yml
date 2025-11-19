@@ -1,20 +1,13 @@
-name: "Ground issue role"
+name: "Ground issue"
 description: "팀 운영 시 기능 추가, 수정, 삭제 등"
 title: "[Ground] "
-
+labels: ["Ground"]
 body:
-  - type: markdown
-    attributes:
-      value: |
-        # 🧾 Ground Issue Role
-        팀 운영 중 발생하는 기능 추가, 수정, 삭제 등의 작업 이슈를 등록해주세요.
-
   - type: textarea
     id: description
     attributes:
       label: 💡 이슈 설명
-      description: "왜 이 이슈가 필요한가?"
-      placeholder: "예시: Dart API 응답 지연으로 인해 Embedding 호출이 늦어지고 있음"
+      placeholder: "왜 이 이슈가 필요한가요?"
     validations:
       required: true
 
@@ -23,44 +16,17 @@ body:
     attributes:
       label: 📅 완료 예정일
       placeholder: "YYYY-MM-DD"
-      description: "예: 2025-11-10"
     validations:
       required: false
-
-  - type: input
-    id: assignee
-    attributes:
-      label: 👤 담당자
-      description: "이슈 담당자를 @아이디 형태로 적어주세요. 아래 본문에도 자동 표시됩니다."
-    validations:
-      required: true
 
   - type: dropdown
     id: priority
     attributes:
       label: 🔥 우선순위
-      description: "이슈의 중요도와 시급성을 선택하세요."
       options:
-        - "A - 당장 해야 할 일 (긴급)"
-        - "B - 오늘 안에"
-        - "C - 이번 주 안에"
-        - "D - 언젠가는.."
+        - "A - 긴급"
+        - "B - 오늘"
+        - "C - 이번 주"
+        - "D - 언젠가"
     validations:
       required: true
-
-  - type: markdown
-    attributes:
-      value: |
-        ---
-        ## 💡 이슈 설명 요약
-        - **이유:** ${{ inputs.description }}
-        - **완료 예정일:** ${{ inputs.deadline }}
-
-        ## 👤 담당자
-        - ${{ inputs.assignee }}
-
-        ## 🔥 우선순위
-        - ${{ inputs.priority }}
-
-        ---
-        _자동 생성된 섹션입니다. 위 입력값이 본문에 반영됩니다._
