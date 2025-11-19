@@ -37,3 +37,7 @@ out/
 .vscode/
 
 .env
+# macOS Finder
+.DS_Store
+*/.DS_Store
+**/.DS_Store
