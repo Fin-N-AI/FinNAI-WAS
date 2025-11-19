@@ -1,302 +1,252 @@
 -- ========================================
--- pgvector 확장 활성화 (벡터 임베딩 저장/검색 기능 제공)
+-- pgvector 확장
 -- ========================================
 CREATE EXTENSION IF NOT EXISTS vector;
+
 
 
 -- ========================================
 -- 1. 사용자 계정 (Auth)
 -- ========================================
-CREATE TABLE IF NOT EXISTS user_account
-(
-    id         SERIAL PRIMARY KEY,
-    -- 내부적으로 사용하는 사용자 고유 ID
-
-    email      VARCHAR(255) UNIQUE NOT NULL
-        CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'),
-    -- 로그인용 이메일 (중복 불가)
-
-    password   VARCHAR(255)        NOT NULL
-        CHECK (length(password) >= 8),
-    -- 해시된 비밀번호 (평문 저장 금지) / 최소 길이 강제
-
-    -- 계정 상태 제한: ACTIVE / WITHDRAWN / BANNED
-    status     VARCHAR(30)
-                         DEFAULT 'ACTIVE'
-        CHECK (status IN ('ACTIVE', 'WITHDRAWN', 'BANNED')),
-
-    created_at TIMESTAMP DEFAULT NOW(),
-    -- 계정 생성 시각
-
-    updated_at TIMESTAMP DEFAULT NOW()
-    -- 계정 정보 수정 시각
+CREATE TABLE IF NOT EXISTS user_account (
+                                            id          SERIAL PRIMARY KEY,
+                                            email       VARCHAR(255) UNIQUE NOT NULL
+                                                CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'),
+                                            password    VARCHAR(255) NOT NULL
+                                                CHECK (length(password) >= 8),
+                                            status      VARCHAR(30) DEFAULT 'ACTIVE'
+                                                CHECK (status IN ('ACTIVE', 'WITHDRAWN', 'BANNED')),
+                                            created_at  TIMESTAMP DEFAULT NOW(),
+                                            updated_at  TIMESTAMP DEFAULT NOW()
 );
 
 
--- 권한 테이블 (유저별 Role 저장)
-CREATE TABLE IF NOT EXISTS user_role
-(
-    id        SERIAL PRIMARY KEY,
-    -- 고유 ID
-
-    user_id   INT REFERENCES user_account (id) ON DELETE CASCADE,
-    -- 특정 유저의 권한. 유저 삭제 시 권한도 함께 삭제
-
-    role_name VARCHAR(50) NOT NULL
-        CHECK (role_name IN ('USER', 'ADMIN'))
-    -- 권한 이름(USER/ADMIN 등)
-);
-
-
--- ========================================
--- 2. 사용자 프로필 (이미지, 기본정보)
--- ========================================
-CREATE TABLE IF NOT EXISTS user_profile
-(
-    id            SERIAL PRIMARY KEY,
-    -- 프로필 ID
-
-    user_id       INT UNIQUE REFERENCES user_account (id) ON DELETE CASCADE,
-    -- user_account와 1:1, 유저 삭제 시 프로필도 삭제
-
-    username      VARCHAR(255)
-        CHECK (char_length(username) >= 2),
-    -- 닉네임 (최소 2자)
-
-    profile_image BYTEA
-        CHECK (octet_length(profile_image) <= 5 * 1024 * 1024),
-    -- 프로필 이미지 (byte 형태로 저장, 5MB 이하)
-
-    bio           VARCHAR(500),
-    -- 자기소개 글
-
-    created_at    TIMESTAMP DEFAULT NOW(),
-    -- 생성 시각
-
-    updated_at    TIMESTAMP DEFAULT NOW()
-    -- 수정 시각
-);
-
-
--- ========================================
--- 3. 기업 테이블 (기업 정보)
--- ========================================
-CREATE TABLE IF NOT EXISTS company
-(
-    id                SERIAL PRIMARY KEY,
-    -- 기업 고유 ID
-
-    name              VARCHAR(255) NOT NULL,
-    -- 기업명
-
-    stock_code        VARCHAR(50) UNIQUE
-        CHECK (length(stock_code) >= 3),
-    -- 종목코드 (중복 불가)
-
-    sector            VARCHAR(255),
-    -- 업종/섹터 정보
-
-    market            VARCHAR(255)
-        CHECK (market IN ('KOSPI', 'KOSDAQ', 'ETF', 'ETN', 'OTHER')),
-    -- 시장 구분(KOSPI, KOSDAQ 등)
-
-    homepage_url      VARCHAR(500)
-        CHECK (homepage_url ~* '^https?://'),
-    -- 기업 홈페이지 주소
-
-    headquarters_addr VARCHAR(500),
-    -- 본사 주소지
-
-    founded_date      DATE
-        CHECK (founded_date <= CURRENT_DATE),
-    -- 설립일 (미래 금지)
-
-    corporate_reg_no  VARCHAR(100),
-    -- 법인등록번호
-
-    business_reg_no   VARCHAR(100),
-    -- 사업자등록번호
-
-    phone_number      VARCHAR(50)
-        CHECK (phone_number ~ '^[0-9\-+() ]+$'),
-    -- 대표 전화번호
-
-    created_at        TIMESTAMP DEFAULT NOW(),
-    -- 데이터 생성시각
-
-    updated_at        TIMESTAMP DEFAULT NOW()
-    -- 데이터 수정시각
-);
-
-
--- ========================================
--- 4. 기업 벡터 임베딩 (pgvector)
--- ========================================
-CREATE TABLE IF NOT EXISTS company_embedding
-(
-    id         SERIAL PRIMARY KEY,
-    -- 임베딩 고유 ID
-
-    company_id INT REFERENCES company (id) ON DELETE CASCADE,
-    -- 어떤 회사의 임베딩인지 연결
-
-    embedding  vector(1536)
-        CHECK (embedding IS NOT NULL),
-    -- 회사 특징을 표현하는 임베딩 벡터
-
-    created_at TIMESTAMP DEFAULT NOW()
-    -- 생성 시각
+-- 권한 테이블
+CREATE TABLE IF NOT EXISTS user_role (
+                                         id         SERIAL PRIMARY KEY,
+                                         user_id    INT REFERENCES user_account(id) ON DELETE CASCADE,
+                                         role_name  VARCHAR(50) NOT NULL
+                                             CHECK (role_name IN ('USER', 'ADMIN'))
 );
 
 
 
 -- ========================================
--- 5. 북마크 (기업 북마크)
+-- 2. 사용자 프로필
 -- ========================================
-CREATE TABLE IF NOT EXISTS bookmark
-(
-    id         SERIAL PRIMARY KEY,
-    -- 북마크 ID
-
-    user_id    INT REFERENCES user_account (id) ON DELETE CASCADE,
-    -- 북마크를 단 사용자
-
-    company_id INT REFERENCES company (id) ON DELETE CASCADE,
-    -- 북마크된 기업
-
-    created_at TIMESTAMP DEFAULT NOW(),
-    -- 북마크한 시각
-
-    UNIQUE (user_id, company_id),
-    -- 같은 기업 중복 북마크 방지
-
-    CHECK (user_id > 0 AND company_id > 0)
+CREATE TABLE IF NOT EXISTS user_profile (
+                                            id            SERIAL PRIMARY KEY,
+                                            user_id       INT UNIQUE REFERENCES user_account(id) ON DELETE CASCADE,
+                                            username      VARCHAR(255)
+                                                CHECK (char_length(username) >= 2),
+                                            profile_image BYTEA
+                                                CHECK (octet_length(profile_image) <= 5 * 1024 * 1024),
+                                            bio           VARCHAR(500),
+                                            created_at    TIMESTAMP DEFAULT NOW(),
+                                            updated_at    TIMESTAMP DEFAULT NOW()
 );
 
 
+
 -- ========================================
--- 6. 관심기업 구독 (following)
+-- 3. 기업 정보 (company) — DART 기업개황 API 기반
 -- ========================================
-CREATE TABLE IF NOT EXISTS following_company
-(
-    id         SERIAL PRIMARY KEY,
-    -- 팔로우 ID
-
-    user_id    INT REFERENCES user_account (id) ON DELETE CASCADE,
-    -- 구독한 사용자
-
-    company_id INT REFERENCES company (id) ON DELETE CASCADE,
-    -- 구독된 기업
-
-    created_at TIMESTAMP DEFAULT NOW(),
-    -- 구독한 시각
-
-    UNIQUE (user_id, company_id)
-    -- 동일 기업 중복 구독 방지
+CREATE TABLE IF NOT EXISTS company (
+                                       id                SERIAL PRIMARY KEY,
+                                       corp_code         VARCHAR(20) UNIQUE,            -- DART 고유번호
+                                       name              VARCHAR(255) NOT NULL,
+                                       stock_code        VARCHAR(50) UNIQUE
+                                           CHECK (length(stock_code) >= 3),
+                                       sector            VARCHAR(255),
+                                       market            VARCHAR(50)
+                                           CHECK (market IN ('KOSPI', 'KOSDAQ', 'ETF', 'ETN', 'OTHER')),
+                                       homepage_url      VARCHAR(500)
+                                           CHECK (homepage_url ~* '^https?://'),
+                                       headquarters_addr VARCHAR(500),
+                                       founded_date      DATE
+                                           CHECK (founded_date <= CURRENT_DATE),
+                                       corporate_reg_no  VARCHAR(100),
+                                       business_reg_no   VARCHAR(100),
+                                       phone_number      VARCHAR(50),
+                                       created_at        TIMESTAMP DEFAULT NOW(),
+                                       updated_at        TIMESTAMP DEFAULT NOW()
 );
 
 
+
 -- ========================================
--- 7. 건의/피드백 게시판
+-- 4. 기업 임베딩 (vector)
 -- ========================================
-CREATE TABLE IF NOT EXISTS feedback_board
-(
-    id         SERIAL PRIMARY KEY,
-    -- 게시글 ID
-
-    user_id    INT          REFERENCES user_account (id) ON DELETE SET NULL,
-    -- 작성자가 탈퇴해도 게시글은 남기기 위해 SET NULL
-
-    title      VARCHAR(255) NOT NULL
-        CHECK (char_length(title) > 0),
-    -- 제목
-
-    content    TEXT         NOT NULL
-        CHECK (char_length(content) > 0),
-    -- 게시물 내용
-
-    is_public  BOOLEAN   DEFAULT TRUE,
-    -- 공개 여부(TRUE면 모든 유저 열람 가능)
-
-    created_at TIMESTAMP DEFAULT NOW(),
-    -- 작성 시각
-
-    updated_at TIMESTAMP DEFAULT NOW(),
-    -- 수정 시각
-
-    deleted_at TIMESTAMP
-    -- soft delete 처리 시각(NULL이면 정상 글)
+CREATE TABLE IF NOT EXISTS company_embedding (
+                                                 id          SERIAL PRIMARY KEY,
+                                                 company_id  INT REFERENCES company(id) ON DELETE CASCADE,
+                                                 embedding   vector(1536) NOT NULL,
+                                                 created_at  TIMESTAMP DEFAULT NOW()
 );
 
--- 댓글 (관리자만 댓글 허용 가능)
-CREATE TABLE IF NOT EXISTS feedback_comment
-(
-    id         SERIAL PRIMARY KEY,
-    -- 댓글 ID
+CREATE INDEX idx_company_embedding_vector
+    ON company_embedding
+        USING hnsw (embedding vector_l2_ops);
 
-    board_id   INT REFERENCES feedback_board (id) ON DELETE CASCADE,
-    -- 원본 게시글 삭제 시 댓글도 함께 삭제
 
-    user_id    INT  REFERENCES user_account (id) ON DELETE SET NULL,
-    -- 유저 삭제 시 댓글은 유지하되 작성자 NULL 처리
 
-    content    TEXT NOT NULL
-        CHECK (char_length(content) > 0),
-    -- 댓글 내용
+-- ========================================
+-- 5. 북마크 및 구독 (Watchlist)
+-- ========================================
+CREATE TABLE IF NOT EXISTS bookmark (
+                                        id          SERIAL PRIMARY KEY,
+                                        user_id     INT REFERENCES user_account(id) ON DELETE CASCADE,
+                                        company_id  INT REFERENCES company(id) ON DELETE CASCADE,
+                                        created_at  TIMESTAMP DEFAULT NOW(),
+                                        UNIQUE (user_id, company_id)
+);
 
-    created_at TIMESTAMP DEFAULT NOW(),
-    -- 작성 시각
-
-    updated_at TIMESTAMP DEFAULT NOW(),
-    -- 수정 시각
-
-    deleted_at TIMESTAMP
-    -- soft delete 시각
+CREATE TABLE IF NOT EXISTS following_company (
+                                                 id          SERIAL PRIMARY KEY,
+                                                 user_id     INT REFERENCES user_account(id) ON DELETE CASCADE,
+                                                 company_id  INT REFERENCES company(id) ON DELETE CASCADE,
+                                                 created_at  TIMESTAMP DEFAULT NOW(),
+                                                 UNIQUE (user_id, company_id)
 );
 
 
+
 -- ========================================
--- 8. DART 공시 데이터 (향후 Agent 분석용)
+-- 6. 건의사항/피드백 게시판
 -- ========================================
-CREATE TABLE IF NOT EXISTS dart_report
-(
-    id           SERIAL PRIMARY KEY,
-    -- 보고서 ID
+CREATE TABLE IF NOT EXISTS feedback_board (
+                                              id          SERIAL PRIMARY KEY,
+                                              user_id     INT REFERENCES user_account(id) ON DELETE SET NULL,
+                                              title       VARCHAR(255) NOT NULL,
+                                              content     TEXT NOT NULL,
+                                              is_public   BOOLEAN DEFAULT TRUE,
+                                              created_at  TIMESTAMP DEFAULT NOW(),
+                                              updated_at  TIMESTAMP DEFAULT NOW(),
+                                              deleted_at  TIMESTAMP
+);
 
-    company_id   INT REFERENCES company (id) ON DELETE CASCADE,
-    -- 해당 보고서가 어떤 회사 것인지
-
-    report_type  VARCHAR(255)
-        CHECK (report_type IN ('사업보고서', '분기보고서', '반기보고서', '기타')),
-    -- 보고서 종류(사업보고서, 분기보고서 등)
-
-    title        VARCHAR(500),
-    -- 보고서 제목
-
-    content      TEXT,
-    -- 보고서 전문 텍스트
-
-    published_at TIMESTAMP
-        CHECK (published_at <= NOW()),
-    -- DART에 실제 공개된 날짜
-
-    created_at   TIMESTAMP DEFAULT NOW()
-    -- 등록 시각
+CREATE TABLE IF NOT EXISTS feedback_comment (
+                                                id          SERIAL PRIMARY KEY,
+                                                board_id    INT REFERENCES feedback_board(id) ON DELETE CASCADE,
+                                                user_id     INT REFERENCES user_account(id) ON DELETE SET NULL,
+                                                content     TEXT NOT NULL,
+                                                created_at  TIMESTAMP DEFAULT NOW(),
+                                                updated_at  TIMESTAMP DEFAULT NOW(),
+                                                deleted_at  TIMESTAMP
 );
 
 
-CREATE TABLE IF NOT EXISTS dart_report_embedding
-(
-    id         SERIAL PRIMARY KEY,
-    -- 임베딩 ID
 
-    report_id  INT REFERENCES dart_report (id) ON DELETE CASCADE,
-    -- 어떤 보고서의 임베딩인지
+-- ========================================
+-- 7. DART 공시 목록 (list API) — ★ 필수
+-- ========================================
+CREATE TABLE IF NOT EXISTS disclosure_list (
+                                               id          SERIAL PRIMARY KEY,
+                                               company_id  INT REFERENCES company(id) ON DELETE CASCADE,
+                                               rcept_no    VARCHAR(20) UNIQUE NOT NULL,  -- 공시 원문 키
+                                               report_nm   VARCHAR(500) NOT NULL,        -- 공시 제목
+                                               rcept_dt    DATE NOT NULL,                -- 공시 일자
+                                               rpt_type    VARCHAR(50),
+                                               flr_nm      VARCHAR(255),
+                                               created_at  TIMESTAMP DEFAULT NOW()
+);
 
-    embedding  vector(1536)
-        CHECK (embedding IS NOT NULL),
-    -- 보고서 내용을 벡터화한 데이터
+CREATE INDEX idx_disclosure_company_date
+    ON disclosure_list(company_id, rcept_dt DESC);
 
-    created_at TIMESTAMP DEFAULT NOW()
-    -- 저장 시각
+
+
+-- ========================================
+-- 8. 공시 원문 및 첨부파일 (document API)
+-- ========================================
+CREATE TABLE IF NOT EXISTS disclosure_file (
+                                               id             SERIAL PRIMARY KEY,
+                                               disclosure_id  INT REFERENCES disclosure_list(id) ON DELETE CASCADE,
+                                               file_type      VARCHAR(50)
+                                                   CHECK (file_type IN ('HTML', 'PDF', 'XBRL')),
+                                               file_url       VARCHAR(500),             -- S3 / MinIO 저장 경로
+                                               raw_content    TEXT,                     -- HTML or PDF OCR 텍스트
+                                               created_at     TIMESTAMP DEFAULT NOW()
+);
+
+
+
+-- ========================================
+-- 9. DART 정기보고서 전문 (사업/분기/반기 보고서)
+-- ========================================
+CREATE TABLE IF NOT EXISTS dart_report (
+                                           id            SERIAL PRIMARY KEY,
+                                           company_id    INT REFERENCES company(id) ON DELETE CASCADE,
+                                           rcept_no      VARCHAR(20) UNIQUE,        -- 연결
+                                           report_type   VARCHAR(255)
+                                               CHECK (report_type IN ('사업보고서', '분기보고서', '반기보고서', '기타')),
+                                           title         VARCHAR(500),
+                                           content       TEXT,                       -- 전문 텍스트
+                                           published_at  TIMESTAMP,
+                                           created_at    TIMESTAMP DEFAULT NOW()
+);
+
+
+
+-- 정기보고서 임베딩
+CREATE TABLE IF NOT EXISTS dart_report_embedding (
+                                                     id         SERIAL PRIMARY KEY,
+                                                     report_id  INT REFERENCES dart_report(id) ON DELETE CASCADE,
+                                                     embedding  vector(1536) NOT NULL,
+                                                     created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_report_embedding_vector
+    ON dart_report_embedding
+        USING hnsw (embedding vector_l2_ops);
+
+
+
+-- ========================================
+-- 10. 재무 데이터 저장 (fnlttSinglAcnt API)
+-- ========================================
+CREATE TABLE IF NOT EXISTS financial_account (
+                                                 id           SERIAL PRIMARY KEY,
+                                                 company_id   INT REFERENCES company(id) ON DELETE CASCADE,
+                                                 bsns_year    INT NOT NULL,                   -- 연도
+                                                 reprt_code   VARCHAR(10) NOT NULL,           -- Q1/Q2/사업보고서 코드
+                                                 account_id   VARCHAR(50),
+                                                 account_nm   VARCHAR(255),
+                                                 amount       BIGINT,
+                                                 created_at   TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_fin_acc_company_year
+    ON financial_account(company_id, bsns_year);
+
+
+
+-- ========================================
+-- 11. 재무 지표 저장 (fnlttSinglIndx API)
+-- ========================================
+CREATE TABLE IF NOT EXISTS financial_index (
+                                               id           SERIAL PRIMARY KEY,
+                                               company_id   INT REFERENCES company(id) ON DELETE CASCADE,
+                                               bsns_year    INT NOT NULL,
+                                               reprt_code   VARCHAR(10),
+                                               index_nm     VARCHAR(255),
+                                               index_value  NUMERIC,
+                                               created_at   TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_fin_idx_company_year
+    ON financial_index(company_id, bsns_year);
+
+
+
+-- ========================================
+-- 12. AI 요약 및 분석 결과 저장
+-- ========================================
+CREATE TABLE IF NOT EXISTS ai_summary (
+                                          id             SERIAL PRIMARY KEY,
+                                          disclosure_id  INT REFERENCES disclosure_list(id) ON DELETE CASCADE,
+                                          summary_short  TEXT,
+                                          summary_long   TEXT,
+                                          risk_analysis  TEXT,
+                                          created_at     TIMESTAMP DEFAULT NOW()
 );
