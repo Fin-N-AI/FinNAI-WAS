@@ -1,6 +1,4 @@
 package com.finnai.project.dto;
 
-public class FileUploadDto {
-
-    FileUploadDto fileUpload (FileUploadDto dto);
+public record FileUploadDto (String fileName, String filePath , Long fileSize, String contentType) {
 }
