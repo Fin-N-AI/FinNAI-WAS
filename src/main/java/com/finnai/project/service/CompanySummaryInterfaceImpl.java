@@ -8,7 +8,7 @@ public class CompanySummaryInterfaceImpl implements CompanySummaryInterface {
 
 
     @Override
-    public CompanySummaryDto summary(int id) {
+    public CompanySummaryDto summary(int companyId) {
         return null;
     }
 }
