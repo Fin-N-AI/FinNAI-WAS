@@ -1,4 +1,4 @@
-package com.finnai;
+package com.finnai.project;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
