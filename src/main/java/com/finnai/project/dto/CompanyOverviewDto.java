@@ -1,4 +1,4 @@
 package com.finnai.project.dto;
 
-public class SummaryResponseDto {
+public class CompanyOverviewDto {
 }

@@ -1,7 +1,7 @@
 package com.finnai.project.service;
 
-import com.finnai.project.dto.SummaryResponseDto;
+import com.finnai.project.dto.CompanySummaryDto;
 
 public interface CompanySummaryInterface {
-    SummaryResponseDto summary (int id) ;
+    CompanySummaryDto summary (int id) ;
 }
