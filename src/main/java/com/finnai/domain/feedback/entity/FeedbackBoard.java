@@ -1,10 +1,12 @@
 package com.finnai.domain.feedback.entity;
 
+import com.finnai.domain.user.entity.UserAccount;
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
 
-import com.finnai.domain.user.entity.UserAccount;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -20,7 +22,7 @@ public class FeedbackBoard {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_account_id")
     private UserAccount user;
 
     @Column(nullable = false)
@@ -31,6 +33,10 @@ public class FeedbackBoard {
 
     @Builder.Default
     private Boolean isPublic = true;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FeedbackComment> comments = new ArrayList<>();
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

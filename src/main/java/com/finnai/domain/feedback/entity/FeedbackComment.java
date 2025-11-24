@@ -21,11 +21,11 @@ public class FeedbackComment {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "board_id")
+    @JoinColumn(name = "feedback_board_id")
     private FeedbackBoard board;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_account_id")
     private UserAccount user;
 
     @Column(columnDefinition = "TEXT", nullable = false)

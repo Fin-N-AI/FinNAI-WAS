@@ -14,7 +14,7 @@ import com.finnai.domain.user.entity.UserAccount;
 @Table(
         name = "company_following",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"user_id", "company_id"})
+                @UniqueConstraint(columnNames = {"user_account_id", "company_id"})
         }
 )
 public class CompanyFollowing {
@@ -24,7 +24,7 @@ public class CompanyFollowing {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_account_id")
     private UserAccount user;
 
     @ManyToOne(fetch = FetchType.LAZY)

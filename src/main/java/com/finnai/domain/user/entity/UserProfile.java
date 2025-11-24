@@ -19,7 +19,7 @@ public class UserProfile {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", unique = true)
+    @JoinColumn(name = "user_account_id", unique = true)
     private UserAccount user;
 
     private String username;
