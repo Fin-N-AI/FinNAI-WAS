@@ -3,24 +3,19 @@
     ------------------------------------------------------------
 
     -- 사용자
-    INSERT INTO user_account (email, password, status)
+    INSERT INTO user_account (email, password, status, role_name)
     VALUES
-        ('test1@example.com', 'encryptedpw123', 'ACTIVE'),
-        ('test2@example.com', 'encryptedpw123', 'ACTIVE');
+        ('test1@example.com', 'encryptedpw123', 'ACTIVE', 'ADMIN'),
+        ('test2@example.com', 'encryptedpw123', 'ACTIVE', 'USER');
 
-    INSERT INTO user_role (user_id, role_name)
-    VALUES
-        (1, 'ADMIN'),
-        (2, 'USER');
-
-    INSERT INTO user_profile (user_id, username, bio)
+    INSERT INTO user_profile (user_account_id, username, bio)
     VALUES
         (1, '지석', 'FinNAI 관리자 계정'),
         (2, '투자왕', '주린이 탈출 목표');
 
 
     -- 기업 정보
-    INSERT INTO company (corp_code, name, stock_code, sector, market, homepage_url, headquarters_addr, founded_date, corporate_reg_no, business_reg_no, phone_number)
+    INSERT INTO company (corp_code, name, stock_code, induty_code, market, homepage_url, headquarters_addr, founded_date, corporate_reg_no, business_reg_no, phone_number)
     VALUES
         ('00126380', '삼성전자', '005930', 'IT 제조', 'KOSPI', 'https://www.samsung.com', '경기도 수원시 영통구', '1969-01-13', '110111-1234567', '220-81-12345', '02-2255-0114'),
         ('00149000', '네이버',   '035420', '포털/플랫폼', 'KOSPI', 'https://www.naver.com', '경기도 성남시 분당구', '1999-06-02', '120111-9876543', '129-81-67890', '1588-3830'),
@@ -34,26 +29,32 @@
         (2, ARRAY(SELECT random() FROM generate_series(1,1536))::vector),
         (3, ARRAY(SELECT random() FROM generate_series(1,1536))::vector);
 
-
     -- 북마크 및 관심기업
-    INSERT INTO bookmark (user_id, company_id) VALUES
+    INSERT INTO company_bookmark (user_account_id, company_id) VALUES
                                                    (1, 1),
                                                    (1, 2),
                                                    (2, 3);
 
-    INSERT INTO following_company (user_id, company_id) VALUES
+    INSERT INTO company_following (user_account_id, company_id) VALUES
                                                             (1, 1),
                                                             (2, 1),
                                                             (2, 2);
 
+    -- 회사 파일 및 임베딩 (유저 업로드 → 회사 귀속)
+    INSERT INTO company_file (company_id, uploaded_by, file_type, file_url, original_name, raw_content)
+    VALUES
+        (1, 1, 'PDF',  'https://s3.test/005930_presentation.pdf', '삼성 IR 자료.pdf', '삼성전자 IR 자료 ...'),
+        (2, 2, 'HTML', 'https://s3.test/035420_blog.html',        '네이버 블로그.html', '<html>네이버 서비스 개선안 ...</html>');
+
+
 
     -- 피드백 게시판
-    INSERT INTO feedback_board (user_id, title, content, is_public)
+    INSERT INTO feedback_board (user_account_id, title, content, is_public)
     VALUES
         (1, 'UI 개선 요청', '차트 확대 기능이 필요해요', TRUE),
         (2, '버그 신고', '공시 리스트 무한로딩 발생합니다.', TRUE);
 
-    INSERT INTO feedback_comment (board_id, user_id, content)
+    INSERT INTO feedback_comment (feedback_board_id, user_account_id, content)
     VALUES
         (1, 1, '확인해보겠습니다.'),
         (2, 1, '수정 작업 진행 중입니다.');
@@ -84,15 +85,10 @@
 
 
     -- 정기보고서 임베딩
-    INSERT INTO dart_report_embedding (report_id, embedding)
-    VALUES
-        (1, ARRAY(SELECT random() FROM generate_series(1,1536))::vector),
-        (2, ARRAY(SELECT random() FROM generate_series(1,1536))::vector),
-        (3, ARRAY(SELECT random() FROM generate_series(1,1536))::vector);
 
 
     -- 재무 데이터
-    INSERT INTO financial_account (company_id, bsns_year, reprt_code, account_id, account_nm, amount)
+    INSERT INTO financial_account (company_id, bsns_year, reprt_code, account_id, account_nm, thstrm_amount)
     VALUES
         (1, 2023, '11011', 'sales', '매출액', 260000000000),
         (1, 2023, '11011', 'op_profit', '영업이익', 32000000000),
@@ -121,14 +117,6 @@
 
 
     -- AI 요약 데이터
-    INSERT INTO ai_summary (disclosure_id, summary_short, summary_long, risk_analysis)
-    VALUES
-        (1, '삼성전자 2023 사업보고서 핵심 요약', '삼성전자는 2023년 글로벌 경기 둔화에도 불구하고 반도체 사업을 중심으로 안정적인 실적을 유지했습니다...', '리스크: 반도체 가격 변동, 글로벌 금리 이슈'),
-        (2, '네이버 2024년 1Q 실적 요약', '네이버는 검색/광고 매출 증가와 클라우드 부문 성장에 힘입어 안정적인 실적 달성을 기록...', '리스크: AI 경쟁 심화'),
-        (3, '카카오 2024 반기보고서 요약', '모빌리티/콘텐츠 부문 성장이 눈에 띔. 수익성 개선을 위한 구조조정 진행 중...', '리스크: 카카오톡 장애 재발 우려');
-
-
-
     ------------------------------------------------------------
     -- 2. 검색 쿼리 세트
     ------------------------------------------------------------
@@ -174,12 +162,6 @@
     WHERE d.rcept_no = '20240101000001';
 
 
-    -- 공시 AI 요약 조회
-    SELECT *
-    FROM ai_summary
-    WHERE disclosure_id = 1;
-
-
     -- 정기보고서 전문 조회
     SELECT *
     FROM dart_report
@@ -203,19 +185,17 @@
 
     -- 유저 북마크 리스트
     SELECT *
-    FROM bookmark b
+    FROM company_bookmark b
              JOIN company c ON b.company_id = c.id
-    WHERE b.user_id = 1;
+    WHERE b.user_account_id = 1;
 
 
     -- 최신 공시 + AI 요약
     SELECT
         d.report_nm,
-        d.rcept_dt,
-        COALESCE(a.summary_short, '요약 준비 중') AS summary_short
+        d.rcept_dt
     FROM disclosure_list d
-             LEFT JOIN ai_summary a ON a.disclosure_id = d.id
+             LEFT JOIN disclosure_file f ON f.disclosure_id = d.id
     WHERE d.company_id = 1
     ORDER BY d.rcept_dt DESC
     LIMIT 1;
-
