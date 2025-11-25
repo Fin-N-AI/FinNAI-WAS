@@ -2,6 +2,7 @@ package com.finnai.project.controller;
 
 
 import com.finnai.project.dto.*;
+import com.finnai.project.response.GlobalApiResponse;
 import com.finnai.project.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,7 @@ public class CompanyControllerApi {
 //    get : /api/v1/company/{id}/summary 단일 회사 단건 조회
 
     @GetMapping("/{id}/summary")
-    public CompanySummaryDto summary (@PathVariable("id") int companyId) {
+    public GlobalApiResponse<CompanySummaryDto> summary (@PathVariable("id") int companyId) {
 
         if (companyId <0 ) throw new IllegalArgumentException("회사 번호가 0미만으로 올바른 값이 아닙니다.");
 

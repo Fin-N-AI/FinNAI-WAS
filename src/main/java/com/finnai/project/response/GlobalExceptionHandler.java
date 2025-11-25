@@ -16,9 +16,8 @@ public class GlobalExceptionHandler {
 
     // 잘못된 파라미터, 유효성 검증 실패
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body(Map.of("error", e.getMessage()));
+    public GlobalApiResponse<?> handleIllegalArgument(IllegalArgumentException e) {
+        return GlobalApiResponse.error(ErrorCode.COMPANY_NOT_FOUND, e.getMessage());
     }
 
     // 데이터 못 찾음

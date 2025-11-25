@@ -4,6 +4,8 @@ import com.finnai.project.dto.AuthPasswordVerificationDto;
 import com.finnai.project.dto.AuthRefreshTokenRequestDto;
 import com.finnai.project.dto.AuthRefreshTokenResponseDto;
 import com.finnai.project.dto.AuthSignUpDto;
+import com.finnai.project.response.GlobalApiResponse;
+import com.finnai.project.response.SuccessCode;
 import com.finnai.project.service.AuthPasswordVerificationInterface;
 import com.finnai.project.service.AuthRefreshTokenInterface;
 import com.finnai.project.service.AuthSignUpInterface;
@@ -29,8 +31,8 @@ public class AuthControllerApi {
 //    }
 
     @PostMapping("/sing-up")
-    public AuthSignUpDto authSingUp (@RequestBody AuthSignUpDto dto) {
-        return authSignUpInterface.signUp(dto.email(), dto.password());
+    public GlobalApiResponse<AuthSignUpDto> authSingUp (@RequestBody AuthSignUpDto dto) {
+        return GlobalApiResponse.success(SuccessCode.COMPANY_SUCCESS, authSignUpInterface.signUp(dto.email(), dto.password()))
     }
 
     @PostMapping("/refresh")
