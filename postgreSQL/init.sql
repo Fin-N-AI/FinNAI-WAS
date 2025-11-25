@@ -1,6 +1,3 @@
--- ============================================================
--- DROP TABLES (child → parent)
--- ============================================================
 DROP TABLE IF EXISTS company_file CASCADE;
 DROP TABLE IF EXISTS company_embedding CASCADE;
 DROP TABLE IF EXISTS company_bookmark CASCADE;
@@ -13,10 +10,10 @@ DROP TABLE IF EXISTS disclosure_file CASCADE;
 DROP TABLE IF EXISTS disclosure_list CASCADE;
 DROP TABLE IF EXISTS financial_account CASCADE;
 DROP TABLE IF EXISTS financial_index CASCADE;
-
--- legacy tables to clean out
 DROP TABLE IF EXISTS company CASCADE;
 DROP TABLE IF EXISTS user_account CASCADE;
+
+CREATE EXTENSION IF NOT EXISTS vector;
 
 
 -- ============================================================
