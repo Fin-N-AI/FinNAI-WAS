@@ -45,6 +45,7 @@ CREATE TABLE company (
     corporate_reg_no    VARCHAR(255),
     business_reg_no     VARCHAR(255),
     phone_number        VARCHAR(255),
+    ceo_name            VARCHAR(255),
     description         TEXT,
     overview            TEXT,
     created_at          TIMESTAMP(6),

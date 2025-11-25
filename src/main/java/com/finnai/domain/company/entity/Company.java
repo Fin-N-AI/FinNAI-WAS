@@ -48,6 +48,8 @@ public class Company {
     private String businessRegNo;
     // 대표전화 (내부 수집값)
     private String phoneNumber;
+    // 대표이름
+    private String ceoName;
 
     // 회사 개요 (요약, 내부 수집값)
     @Column(columnDefinition = "TEXT")
