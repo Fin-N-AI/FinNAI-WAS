@@ -21,8 +21,10 @@ public class UserControllerApi {
     private final UserService userService;
     private final UserBookmarkService userBookUserService;
 
-    @PutMapping("")
-    public void update (@RequestBody UserDto dto){
+    @PutMapping("/{id}")
+    public GlobalApiResponse<UserDto> updateUser (@PathVariable Long id){
+        UserDto userDto = userService.updateUserById(id);
+        return GlobalApiResponse.success(SuccessCode.UPDATED, userDto);
 
     }
     @GetMapping("/{id}")
@@ -31,9 +33,9 @@ public class UserControllerApi {
         UserDto userDto = userService.getUserById(id);
         return GlobalApiResponse.success(SuccessCode.SUCCESS, userDto);
     }
-    @DeleteMapping("")
-    public GlobalApiResponse<UserDto> deleteUser (@RequestBody UserDto dto){
-        UserDto userDto = userService.deleteUser(dto);
+    @DeleteMapping("/{id}")
+    public GlobalApiResponse<UserDto> deleteUser (@PathVariable Long id){
+        UserDto userDto = userService.deleteUserById(id);
 
         return GlobalApiResponse.success(SuccessCode.REMOVED, userDto);
 

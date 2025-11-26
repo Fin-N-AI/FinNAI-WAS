@@ -4,7 +4,7 @@ import com.finnai.project.dto.UserDto;
 
 public interface UserService {
 
-    UserDto updateUser (UserDto dto);
-    UserDto deleteUser (UserDto dto);
+    UserDto updateUserById (Long id);
+    UserDto deleteUserById (Long id);
     UserDto getUserById (Long id);
 }
