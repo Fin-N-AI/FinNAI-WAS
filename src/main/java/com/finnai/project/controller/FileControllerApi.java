@@ -3,8 +3,10 @@ package com.finnai.project.controller;
 
 import com.finnai.project.dto.FileInsightDto;
 import com.finnai.project.dto.FileUploadDto;
-import com.finnai.project.service.FileInsightInterface;
-import com.finnai.project.service.FileUploadInterface;
+import com.finnai.project.response.GlobalApiResponse;
+import com.finnai.project.response.SuccessCode;
+import com.finnai.project.service.FileInsightService;
+import com.finnai.project.service.FileUploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,24 +16,30 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class FileControllerApi {
 
-    private FileUploadInterface fileUploadInterface;
-    private FileInsightInterface fileInsightInterface;
+    private FileUploadService fileUploadService;
+    private FileInsightService fileInsightService;
 
     @PostMapping("")
-    public FileUploadDto fileUpload(@RequestParam("file")MultipartFile file) {
+    public GlobalApiResponse<FileUploadDto>  fileUpload(@RequestParam("file")MultipartFile file) {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("파일이 비어있습니다.");
         }
-        return fileUploadInterface.fileUpload(file);
+
+        FileUploadDto fileUploadDto = fileUploadService.fileUpload(file);
+
+        return GlobalApiResponse.success(SuccessCode.CREATED, fileUploadDto);
     }
 
 
     @GetMapping("/{fileSessionId}/insight")
-    public FileInsightDto insight(@PathVariable("fileSessionId") String fileSessionId) {
+    public GlobalApiResponse<FileInsightDto> insight(@PathVariable("fileSessionId") String fileSessionId) {
         if (fileSessionId == null || fileSessionId.isBlank()) {
             throw new IllegalArgumentException("파일 세션 ID가 올바르지 않습니다.");
         }
-        return fileInsightInterface.getInsight(fileSessionId);
+
+        FileInsightDto insightDto = fileInsightService.getInsight(fileSessionId);
+
+        return GlobalApiResponse.success(SuccessCode.CREATED, insightDto);
     }
 
 

@@ -6,9 +6,9 @@ import com.finnai.project.dto.AuthRefreshTokenResponseDto;
 import com.finnai.project.dto.AuthSignUpDto;
 import com.finnai.project.response.GlobalApiResponse;
 import com.finnai.project.response.SuccessCode;
-import com.finnai.project.service.AuthPasswordVerificationInterface;
-import com.finnai.project.service.AuthRefreshTokenInterface;
-import com.finnai.project.service.AuthSignUpInterface;
+import com.finnai.project.service.AuthPasswordVerificationService;
+import com.finnai.project.service.AuthRefreshTokenService;
+import com.finnai.project.service.AuthSignUpService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,33 +17,32 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthControllerApi {
 
-    private AuthSignUpInterface authSignUpInterface;
-    private AuthRefreshTokenInterface authRefreshTokenInterface;
-    private AuthPasswordVerificationInterface authPasswordVerificationInterface;
+    private final AuthSignUpService authSignUpService;
+    private final AuthRefreshTokenService authRefreshTokenService;
+    private final AuthPasswordVerificationService authPasswordVerificationService;
 
-//    public CompanySummaryDto summary (@PathVariable("id") int companyId) {
-//
-//        if (companyId <0 ) throw new IllegalArgumentException("회사 번호가 0미만으로 올바른 값이 아닙니다.");
-//
-//        return companySummary.summary(companyId);
-//
-//
-//    }
 
     @PostMapping("/sing-up")
     public GlobalApiResponse<AuthSignUpDto> authSingUp (@RequestBody AuthSignUpDto dto) {
-        return GlobalApiResponse.success(SuccessCode.COMPANY_SUCCESS, authSignUpInterface.signUp(dto.email(), dto.password()))
+        AuthSignUpDto createdUserDto = authSignUpService.signUp(dto.email(), dto.password());
+
+        return GlobalApiResponse.success(SuccessCode.CREATED, createdUserDto );
     }
 
     @PostMapping("/refresh")
-    public AuthRefreshTokenResponseDto refresh (@RequestBody AuthRefreshTokenRequestDto dto){
-        return authRefreshTokenInterface.refresh(dto);
+    public GlobalApiResponse<AuthRefreshTokenResponseDto> refresh (@RequestBody AuthRefreshTokenRequestDto dto){
+
+        AuthRefreshTokenResponseDto refreshedToken = authRefreshTokenService.refresh(dto);
+
+        return GlobalApiResponse.success(SuccessCode.SUCCESS, refreshedToken );
 
     }
 
     @PostMapping("/password/verification")
-    public AuthPasswordVerificationDto passwordVerify (@RequestBody AuthPasswordVerificationDto dto){
-        return authPasswordVerificationInterface.passwordVerify(dto.password());
+    public GlobalApiResponse<AuthPasswordVerificationDto>  passwordVerify (@RequestBody AuthPasswordVerificationDto dto){
+
+        AuthPasswordVerificationDto verifiedPassword =  authPasswordVerificationService.passwordVerify(dto.password());
+        return GlobalApiResponse.success(SuccessCode.SUCCESS, verifiedPassword);
     }
 
 
