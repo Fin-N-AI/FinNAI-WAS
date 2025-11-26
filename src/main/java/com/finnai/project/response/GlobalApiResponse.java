@@ -8,7 +8,7 @@ import lombok.Getter;
 public class GlobalApiResponse<T> {
 
     private boolean isSuccess;
-    private String code;
+    private int code;
     private String message;
     private T data;
 
@@ -45,20 +45,20 @@ public class GlobalApiResponse<T> {
     }
 
     // 실패 응답
-    public static <T> GlobalApiResponse<T> error(ErrorCode successCode) {
+    public static <T> GlobalApiResponse<T> error(ErrorCode errorCode) {
         return new GlobalApiResponse<>(
                 false,
-                successCode.getCode(),
-                successCode.getMessage(),
+                errorCode.getCode(),
+                errorCode.getMessage(),
                 null
         );
     }
 
     // 실패 응답 (커스텀 메시지)
-    public static <T> GlobalApiResponse<T> error(ErrorCode successCode, String customMessage) {
+    public static <T> GlobalApiResponse<T> error(ErrorCode errorCode, String customMessage) {
         return new GlobalApiResponse<>(
                 false,
-                successCode.getCode(),
+                errorCode.getCode(),
                 customMessage,
                 null
         );

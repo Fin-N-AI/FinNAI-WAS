@@ -1,8 +1,12 @@
 package com.finnai.project.response;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public enum SuccessCode {
 
 
@@ -22,9 +26,4 @@ public enum SuccessCode {
     private int code;
     private String message;
 
-
-    SuccessCode(int code, String message) {
-        this.code = code;
-        this.message = message;
-    }
 }
