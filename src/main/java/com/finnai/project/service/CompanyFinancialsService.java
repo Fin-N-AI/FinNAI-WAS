@@ -2,7 +2,7 @@ package com.finnai.project.service;
 
 import com.finnai.project.dto.CompanyFinancialsDto;
 
-public interface CompanyFinancialsInterface {
+public interface CompanyFinancialsService {
 
     CompanyFinancialsDto getFinancial (int companyId );
 }

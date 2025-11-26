@@ -2,7 +2,7 @@ package com.finnai.project.service;
 
 import com.finnai.project.dto.CompanyWatchListRequestDto;
 
-public interface CompanyWatchListInterface {
+public interface CompanyWatchListService {
 
     CompanyWatchListRequestDto watchList (int companyId);
 }

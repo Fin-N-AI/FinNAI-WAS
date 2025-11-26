@@ -2,7 +2,7 @@ package com.finnai.project.service;
 
 import com.finnai.project.dto.CompanyNewsDto;
 
-public interface CompanyNewsInterface {
+public interface CompanyNewsService {
 
     CompanyNewsDto news (int companyId);
 }

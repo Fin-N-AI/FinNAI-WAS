@@ -4,7 +4,7 @@ import com.finnai.project.dto.CompanySummaryDto;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CompanySummaryInterfaceImpl implements CompanySummaryInterface {
+public class CompanySummaryServiceImpl implements CompanySummaryService {
 
 
     @Override
