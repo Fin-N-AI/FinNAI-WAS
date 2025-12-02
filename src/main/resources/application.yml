@@ -1,13 +1,13 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/main
-    username: postgres
-    password: postgres
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: create        # 개발환경: update / 운영은 validate 또는 none 권장
+      ddl-auto: update        # 개발환경: update / 운영은 validate 또는 none 권장
     properties:
       hibernate:
         format_sql: true

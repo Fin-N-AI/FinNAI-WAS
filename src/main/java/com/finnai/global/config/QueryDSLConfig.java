@@ -1,4 +1,4 @@
-package com.finnai.config;
+package com.finnai.global.config;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;

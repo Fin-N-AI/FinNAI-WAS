@@ -1,11 +1,10 @@
 package com.finnai.domain.feedback.entity;
 
+import com.finnai.domain.user.entity.UserAccount;
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
 
-import com.finnai.domain.feedback.entity.FeedbackBoard;
-import com.finnai.domain.user.entity.UserAccount;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter

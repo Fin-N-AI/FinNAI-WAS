@@ -1,11 +1,11 @@
 package com.finnai.domain.disclosure.entity;
 
+import com.finnai.domain.company.entity.Company;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
-import com.finnai.domain.company.entity.Company;
 
 /**
  * https://opendart.fss.or.kr/api/list.json

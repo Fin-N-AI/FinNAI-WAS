@@ -1,10 +1,10 @@
 package com.finnai.domain.finance.entity;
 
+import com.finnai.domain.company.entity.Company;
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
 
-import com.finnai.domain.company.entity.Company;
+import java.time.LocalDateTime;
 
 
 /**
