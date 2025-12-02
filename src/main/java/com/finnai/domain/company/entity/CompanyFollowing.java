@@ -1,9 +1,10 @@
 package com.finnai.domain.company.entity;
 
+import com.finnai.domain.user.entity.UserAccount;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
-import com.finnai.domain.user.entity.UserAccount;
 
 @Getter
 @Setter

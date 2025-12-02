@@ -2,6 +2,7 @@ package com.finnai.domain.company.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 
 
