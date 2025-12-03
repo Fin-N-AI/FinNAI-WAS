@@ -8,15 +8,15 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
-      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_URL=jdbc:postgresql://db:5432/${POSTGRES_DB}
+      - DB_USERNAME=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
     depends_on:
       - db
 
   # PostgreSQL Database
   db:
-    image: postgres:15
+    image: pgvector/pgvector:pg17
     container_name: finnai-db
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
@@ -27,6 +27,7 @@ services:
     volumes:
       # 컨테이너가 삭제되어도 DB 데이터를 영구적으로 보존하기 위한 볼륨 연결
       - postgres-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
 # Docker가 관리할 데이터 볼륨을 정의
 volumes:
