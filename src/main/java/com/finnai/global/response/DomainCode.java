@@ -10,7 +10,8 @@ public enum DomainCode {
     COMPANY(1),
     AUTH(2),
     USER(3),
-    FILE(4);
+    FILE(4),
+    FINANCE(5);
 
     int value;
 }

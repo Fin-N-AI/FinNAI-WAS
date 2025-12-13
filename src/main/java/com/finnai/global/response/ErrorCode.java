@@ -24,6 +24,10 @@ public enum ErrorCode {
 
     /* File (Domain 4) */
     FILE_NOT_FOUND(DomainCode.FILE, ExceptionCode.NOT_FOUND, HttpStatus.NOT_FOUND, "해당 파일을 찾을 수 없습니다."),
+
+    /* Finance (Domain 5) */
+    FINANCIAL_DATA_NOT_FOUND(DomainCode.FINANCE, ExceptionCode.NOT_FOUND, HttpStatus.NOT_FOUND, "해당 기업의 재무 데이터를 찾을 수 없습니다."),
+    INVALID_FINANCIAL_INDICATOR(DomainCode.FINANCE, ExceptionCode.INVALID_INPUT_VALUE, HttpStatus.BAD_REQUEST, "유효하지 않은 재무지표입니다."),
     ;
 
 
